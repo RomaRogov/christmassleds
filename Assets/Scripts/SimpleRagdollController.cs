@@ -10,10 +10,11 @@ public class SimpleRagdollController : MonoBehaviour
     public RagdollHeadController Head => head.GetComponent<RagdollHeadController>();
     public Transform SledsEnd;
 
-    [SerializeField] private GameObject head;
-    [SerializeField] private GameObject hands;
-    [SerializeField] private GameObject legs;
-    [SerializeField] private Rigidbody2D handsHandle;
+    [SerializeField] private Transform body;
+    [SerializeField] private Transform head;
+    [SerializeField] private Transform hands;
+    [SerializeField] private Transform legs;
+    [SerializeField] private GameObject legsLimiter;
     [SerializeField] private LineRenderer rigForward;
     [SerializeField] private LineRenderer rigBack;
     [SerializeField] private Transform palm;
@@ -22,11 +23,12 @@ public class SimpleRagdollController : MonoBehaviour
     private FixedJoint2D assJoint;
     private SpringJoint2D handJoint;
 
+    private Vector3 bodyStartPos;
     private Vector3 headStartPos;
     private Vector3 handsStartPos;
     private Vector3 legsStartPos;
 
-    private Rigidbody2D rb;
+    private Rigidbody2D bodyRB;
     private Rigidbody2D headRB;
     private Rigidbody2D handsRB;
     private Rigidbody2D legsRB;
@@ -35,21 +37,27 @@ public class SimpleRagdollController : MonoBehaviour
     
     public void Init(Rigidbody2D parent, int layer)
     {
-        assJoint = GetComponent<FixedJoint2D>();
-        assJoint.connectedBody = parent;
+        assJoint = legs.GetComponent<FixedJoint2D>();
         handJoint = hands.GetComponent<SpringJoint2D>();
         sledsRB = parent;
 
-        gameObject.layer = layer;
-        head.layer = layer;
-        hands.layer = layer;
-        legs.layer = layer;
+        bool isPlayer = layer == LayerMask.NameToLayer("Player");
+        int ragrollLayer = isPlayer ? LayerMask.NameToLayer("RagdollPlayer") : LayerMask.NameToLayer("RagdollFoe");
+        int legLimiterLayer = isPlayer ? 
+            LayerMask.NameToLayer("LegsLimiterPlayer") : 
+            LayerMask.NameToLayer("LegsLimiterFoe");
+        
+        body.gameObject.layer = ragrollLayer;
+        head.gameObject.layer = ragrollLayer;
+        hands.gameObject.layer = ragrollLayer;
+        legs.gameObject.layer = layer;
+        legsLimiter.layer = legLimiterLayer;
 
-        headStartPos = head.transform.localPosition;
-        handsStartPos = hands.transform.localPosition;
-        legsStartPos = legs.transform.localPosition;
+        headStartPos = head.localPosition;
+        handsStartPos = hands.localPosition;
+        legsStartPos = legs.localPosition;
 
-        rb = GetComponent<Rigidbody2D>();
+        bodyRB = body.GetComponent<Rigidbody2D>();
         headRB = head.GetComponent<Rigidbody2D>();
         handsRB = hands.GetComponent<Rigidbody2D>();
         legsRB = legs.GetComponent<Rigidbody2D>();
@@ -57,51 +65,35 @@ public class SimpleRagdollController : MonoBehaviour
 
     public void MoveToDefault(float time, bool isRight)
     {
-        //assJoint.connectedAnchor = sledsTrans.InverseTransformPoint(transform.TransformPoint(assJoint.anchor));
         SwitchRigidbodies(false);
 
-        head.transform.DOLocalMove(headStartPos, time).SetEase(Ease.OutExpo);
-        hands.transform.DOLocalMove(handsStartPos, time).SetEase(Ease.OutExpo);
-        legs.transform.DOLocalMove(legsStartPos, time).SetEase(Ease.OutExpo);
+        body.DOLocalMove(bodyStartPos, time).SetEase(Ease.OutExpo);
+        head.DOLocalMove(headStartPos, time).SetEase(Ease.OutExpo);
+        hands.DOLocalMove(handsStartPos, time).SetEase(Ease.OutExpo);
+        legs.DOLocalMove(legsStartPos, time).SetEase(Ease.OutExpo);
         
-        head.transform.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
-        hands.transform.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
-        legs.transform.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
+        body.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
+        head.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
+        hands.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
+        legs.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
         
         transform.DOScale(new Vector3(isRight ? 1f : -1f, 1f, 1f), time).SetEase(Ease.OutExpo).OnComplete(() =>
         {
-            //assJoint.connectedAnchor = sledsTrans.InverseTransformPoint(transform.TransformPoint(assJoint.anchor));
             SwitchRigidbodies(true);
         });
     }
 
-    public void SetToDefault(bool isRight)
+    public void SetAnchor(Vector2 assPos, Vector2 handsPos, bool turnedRight)
     {
-        head.transform.localPosition = headStartPos;
-        hands.transform.localPosition = handsStartPos;
-        legs.transform.localPosition = legsStartPos;
-
-        head.transform.localEulerAngles = Vector3.zero;
-        hands.transform.localEulerAngles = Vector3.zero;
-        legs.transform.localEulerAngles = Vector3.zero;
+        if (!bodyRB.simulated)
+            transform.localPosition = assPos;
         
-        transform.localScale = new Vector3(isRight ? 1f : -1f, 1f, 1f);
+        assJoint.connectedBody = sledsRB;
+        assJoint.connectedAnchor = assPos;// + (turnedRight ? Vector2.right : Vector2.left) * assJoint.anchor.x;
+        //assJoint.anchor = Vector2.zero;
 
-        headRB.position = head.transform.position;
-        handsRB.position = hands.transform.position;
-        legsRB.position = legs.transform.position;
-
-        headRB.rotation = 0f;
-        handsRB.rotation = 0f;
-        legsRB.rotation = 0f;
-    }
-
-    public void SetAnchor(Vector2 pos)
-    {
-        if (!rb.simulated)
-            transform.localPosition = pos;
-        assJoint.connectedAnchor = pos;
-        assJoint.anchor = Vector2.zero;
+        handJoint.connectedBody = sledsRB;
+        handJoint.connectedAnchor = handsPos;
     }
 
     private void Update()
@@ -114,17 +106,10 @@ public class SimpleRagdollController : MonoBehaviour
         scarf.positionCount = scarfPoints.Length;
         scarf.SetPositions(Array.ConvertAll(scarfPoints, p => p.position));
     }
-
-    private void FixedUpdate()
-    {
-        handJoint.connectedAnchor = SledsEnd.position;
-        /*float fall = Mathf.Min(sledsRB.velocity.y / 20f, 2f);
-        assJoint.anchor = Vector2.Lerp(assJoint.anchor, Vector2.up * fall, Time.fixedDeltaTime * 20f);*/
-    }
-
+    
     private void SwitchRigidbodies(bool enabled)
     {
-        rb.simulated = enabled;
+        bodyRB.simulated = enabled;
         headRB.simulated = enabled;
         handsRB.simulated = enabled;
         legsRB.simulated = enabled;
@@ -133,7 +118,7 @@ public class SimpleRagdollController : MonoBehaviour
 
         if (!enabled)
         {
-            rb.velocity = headRB.velocity = handsRB.velocity = 
+            bodyRB.velocity = headRB.velocity = handsRB.velocity = 
                 legsRB.velocity = Vector2.zero;
         }
     }

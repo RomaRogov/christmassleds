@@ -152,7 +152,7 @@ MonoBehaviour:
   width: 0.6
   thickness: 0.1
   sledsPhysicsMat: {fileID: 6200000, guid: 41d5e627c1b144330a9d2b7ac3e9a58e, type: 2}
-  ragdollFab: {fileID: 9144185596581965318, guid: d99a4870cbb3f4bd78cba59fdad60988,
+  ragdollFab: {fileID: 9144185596581965318, guid: aea74649a680c40e5a820e0d2e8991b9,
     type: 3}
   nicknameFab: {fileID: 2163180858912446749, guid: f7ae3eb6279444d61bed327b5662499b,
     type: 3}

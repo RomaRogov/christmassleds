@@ -288,11 +288,11 @@ public class SledsController : MonoBehaviour
 
     private void UpdateRagdoll()
     {
+        ragdoll.SledsEnd = (turnedRight ? endAtRight ? endCol : startCol : endAtRight ? startCol : endCol).transform;
         ragdoll.SetAnchor(new Vector2(
             (turnedRight ? endAtRight ? endCol : startCol : endAtRight ? startCol : endCol)
             .transform.localPosition.x + (turnedRight ? -1.2f : 1.2f),
-            massCenter.y + .1f));
-        ragdoll.SledsEnd = (turnedRight ? endAtRight ? endCol : startCol : endAtRight ? startCol : endCol).transform;
+            massCenter.y), ragdoll.SledsEnd.localPosition, turnedRight);
     }
 
     private void Start()
