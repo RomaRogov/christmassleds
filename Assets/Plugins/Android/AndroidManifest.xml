@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mobilegames.stabhunter">
+    <application>
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="KuUcQVLI9Tkf6m55vcp480pDP0P-zDS47MDQrT9A5Qiq5txMDDtSeeBLk5vqE9QSZ5lwvuNTvAxrpvz8NwfO63" />
+    </application>
+</manifest>
