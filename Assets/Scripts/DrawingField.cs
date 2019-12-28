@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -52,6 +53,11 @@ public class DrawingField : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     
     public void OnPointerUp(PointerEventData eventData) { StopDrawingAndCreateSleds(); }
 
+    public void Show()
+    {
+        rt.DOAnchorPosY(0f, .5f).SetEase(Ease.OutBack);
+    }
+
     private void StopDrawingAndCreateSleds()
     {
         if (positions != null && positions.Count > 4)
@@ -81,6 +87,7 @@ public class DrawingField : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     {
         rt = GetComponent<RectTransform>();
         scale = Vector2.one * (4f / rt.rect.height);
+        rt.anchoredPosition = Vector2.down * 1500f;
     }
 
     private void ClampVector(ref Vector2 vec)

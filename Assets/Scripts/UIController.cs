@@ -5,6 +5,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class UIController : MonoBehaviour
 {
@@ -17,6 +18,12 @@ public class UIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI FTUEText;
     [SerializeField] private DrawingField drawingField;
     [SerializeField] private Image fade;
+    [SerializeField] private Button playerNameBtn;
+    [SerializeField] private TextMeshProUGUI playerNameText;
+    [SerializeField] private GameObject waitForOtherPlayer;
+    [SerializeField] private Button startBtn;
+
+    private TouchScreenKeyboard touchScreenKeyboard;
 
     public static void FadeIn(Action callback = null)
     {
@@ -57,5 +64,38 @@ public class UIController : MonoBehaviour
         
         fade.gameObject.SetActive(true);
         FadeOut();
+        
+        playerNameBtn.onClick.AddListener(() =>
+        {
+            touchScreenKeyboard = TouchScreenKeyboard.Open(playerNameText.text);
+        });
+        waitForOtherPlayer.SetActive(false);
+        startBtn.onClick.AddListener(() => { StartCoroutine(StartPlaying()); });
+        resetBtn.gameObject.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (touchScreenKeyboard != null && touchScreenKeyboard.active)
+            playerNameText.text = touchScreenKeyboard.text;
+    }
+
+    private IEnumerator StartPlaying()
+    {
+        startBtn.transform.DOScale(Vector3.zero, .4f).SetEase(Ease.InBack);
+        playerNameBtn.transform.DOScale(Vector3.zero, .4f).SetEase(Ease.InBack).SetDelay(.1f);
+        yield return new WaitForSeconds(.5f);
+        waitForOtherPlayer.transform.localScale = Vector3.zero;
+        waitForOtherPlayer.SetActive(true);
+        waitForOtherPlayer.transform.DOScale(Vector3.one, .4f).SetEase(Ease.OutBack);
+        yield return new WaitForSeconds(1f);
+        GameController.LoadLevel();
+        yield return new WaitForSeconds(Random.Range(2f, 5f));
+        waitForOtherPlayer.transform.DOScale(Vector3.zero, .4f).SetEase(Ease.InBack);
+        yield return new WaitForSeconds(.4f);
+        resetBtn.gameObject.SetActive(true);
+        resetBtn.transform.localScale = Vector3.zero;
+        resetBtn.transform.DOScale(Vector3.one, .4f).SetEase(Ease.OutBack);
+        drawingField.Show();
     }
 }

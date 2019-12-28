@@ -98,6 +98,11 @@ public class GameController : MonoBehaviour
             instance.foePlaying = false;
     }
 
+    public static void LoadLevel()
+    {
+        instance.LoadLevelInternal();
+    }
+
     private IEnumerator GenerateFoeDrawings()
     {
         while (foePlaying)
@@ -152,7 +157,7 @@ public class GameController : MonoBehaviour
         });
     }
     
-    private void LoadLevel()
+    private void LoadLevelInternal()
     {
         playerLevel = Instantiate(instance.levelFabs[levelIndex]);
         foeLevel = Instantiate(instance.levelFabs[levelIndex]);
@@ -206,8 +211,6 @@ public class GameController : MonoBehaviour
             AppLovin.PreloadInterstitial();
             AppLovin.LoadRewardedInterstitial();
         }
-
-        LoadLevel();
     }
 
     private void Update()
