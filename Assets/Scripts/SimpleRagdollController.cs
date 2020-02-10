@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using DG.Tweening;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SimpleRagdollController : MonoBehaviour
 {
@@ -61,6 +62,8 @@ public class SimpleRagdollController : MonoBehaviour
         headRB = head.GetComponent<Rigidbody2D>();
         handsRB = hands.GetComponent<Rigidbody2D>();
         legsRB = legs.GetComponent<Rigidbody2D>();
+
+        scarf.material.color = isPlayer ? GameController.ScarfColor : Random.ColorHSV();
     }
 
     public void MoveToDefault(float time, bool isRight)
@@ -77,7 +80,8 @@ public class SimpleRagdollController : MonoBehaviour
         hands.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
         legs.DORotate(Vector3.zero, time).SetEase(Ease.OutExpo);
         
-        transform.DOScale(new Vector3(isRight ? 1f : -1f, 1f, 1f), time).SetEase(Ease.OutExpo).OnComplete(() =>
+        transform.DOScale(new Vector3(isRight ? 1f : -1f, 1f, 1f), time)
+            .SetEase(Ease.OutExpo).OnComplete(() =>
         {
             SwitchRigidbodies(true);
         });

@@ -18,12 +18,8 @@ public class UIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI FTUEText;
     [SerializeField] private DrawingField drawingField;
     [SerializeField] private Image fade;
-    [SerializeField] private Button playerNameBtn;
-    [SerializeField] private TextMeshProUGUI playerNameText;
     [SerializeField] private GameObject waitForOtherPlayer;
-    [SerializeField] private Button startBtn;
-
-    private TouchScreenKeyboard touchScreenKeyboard;
+    [SerializeField] private UIMainMenu mainMenu;
 
     public static void FadeIn(Action callback = null)
     {
@@ -40,6 +36,11 @@ public class UIController : MonoBehaviour
     public static void ResetFtue()
     {
         instance.FTUEText.transform.localScale = Vector3.one;
+    }
+
+    public static void StartPlaying()
+    {
+        instance.StartCoroutine(instance.StartPlayingInternal());
     }
     
     void Start()
@@ -65,25 +66,13 @@ public class UIController : MonoBehaviour
         fade.gameObject.SetActive(true);
         FadeOut();
         
-        playerNameBtn.onClick.AddListener(() =>
-        {
-            touchScreenKeyboard = TouchScreenKeyboard.Open(playerNameText.text);
-        });
         waitForOtherPlayer.SetActive(false);
-        startBtn.onClick.AddListener(() => { StartCoroutine(StartPlaying()); });
         resetBtn.gameObject.SetActive(false);
     }
 
-    private void Update()
+    private IEnumerator StartPlayingInternal()
     {
-        if (touchScreenKeyboard != null && touchScreenKeyboard.active)
-            playerNameText.text = touchScreenKeyboard.text;
-    }
-
-    private IEnumerator StartPlaying()
-    {
-        startBtn.transform.DOScale(Vector3.zero, .4f).SetEase(Ease.InBack);
-        playerNameBtn.transform.DOScale(Vector3.zero, .4f).SetEase(Ease.InBack).SetDelay(.1f);
+        mainMenu.Hide();
         yield return new WaitForSeconds(.5f);
         waitForOtherPlayer.transform.localScale = Vector3.zero;
         waitForOtherPlayer.SetActive(true);

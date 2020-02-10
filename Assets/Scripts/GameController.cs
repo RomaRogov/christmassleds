@@ -10,6 +10,7 @@ public class GameController : MonoBehaviour
 {
     private const string STORAGE_COINS = "COINS";
     private const string STORAGE_LEVEL = "LEVEL";
+    private const string STORAGE_SCARF_COLOR = "SCARF_COLOR";
 
     public static event Action GameStarted;
     public static event Action<int> CoinsChanged;
@@ -36,6 +37,25 @@ public class GameController : MonoBehaviour
     private int collidesWithFoeLayer;
     private int levelLayer;
     private int decorLayer;
+
+    public static Color ScarfColor
+    {
+        get
+        {
+            int currCol = PlayerPrefs.GetInt(STORAGE_SCARF_COLOR, 0xFF0000);
+            float r = (currCol >> 16) & 0xFF;
+            float g = (currCol >> 8) & 0xFF;
+            float b = currCol & 0xFF;
+            return new Color(r / 255f, g / 255f, b / 255f);
+        }
+        set
+        {
+            int currCol = Mathf.RoundToInt(value.r * 0xFF) << 16 | 
+                          Mathf.RoundToInt(value.g * 0xFF) << 8 |
+                          Mathf.RoundToInt(value.b * 0xFF);
+            PlayerPrefs.SetInt(STORAGE_SCARF_COLOR, currCol);
+        }
+    }
 
     private int coins
     {
@@ -87,6 +107,12 @@ public class GameController : MonoBehaviour
     public static void AddCoin()
     {
         instance.coins++;
+        CoinsChanged?.Invoke(instance.coins);
+    }
+    
+    public static void SpendCoins(int amount)
+    {
+        instance.coins -= amount;
         CoinsChanged?.Invoke(instance.coins);
     }
 
