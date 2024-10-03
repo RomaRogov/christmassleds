@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Experimental.PlayerLoop;
 
 public class RagdollController : MonoBehaviour
 {
